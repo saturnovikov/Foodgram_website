@@ -30,6 +30,8 @@ SECRET_KEY = '(dx$+u_tei%9*e5+g9z*y#14v0ro(-5m9qbhu()_95hm%1w53!'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+AUTH_USER_MODEL = 'users.User'
+
 ALLOWED_HOSTS = []
 
 
