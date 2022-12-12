@@ -34,7 +34,8 @@ class User(AbstractUser):
         'Пароль',
         max_length=150,
     )
-    role = models.Choices(
+    role = models.CharField(
+        max_length=150,
         choices=ROLE_CHOICES,
         default=USER,
     )
