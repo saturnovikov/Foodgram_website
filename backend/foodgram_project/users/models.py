@@ -9,14 +9,14 @@ ROLE_CHOICES = (
     ('user', 'Пользователь'),
     ('admin', 'Администратор'),
 )
-CATEGORY_REGEX = RegexValidator(r'^[\w.@+-]+\z')
+USERNAME_REGEX = RegexValidator(r'^[\w.@+-]+\Z')
 
 class User(AbstractUser):
     username = models.CharField(
-        'Login',
+        'Username',
         max_length=150,
         unique = True,
-        validators=[CATEGORY_REGEX]
+        validators=[USERNAME_REGEX]
     )
     email = models.EmailField(
         max_length=254,
@@ -35,6 +35,7 @@ class User(AbstractUser):
         max_length=150,
     )
     role = models.CharField(
+        'Роль',
         max_length=150,
         choices=ROLE_CHOICES,
         default=USER,
