@@ -44,9 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'api',
     'foodgram',
     'users',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_filters',
+    'djoser',
 ]
 
 MIDDLEWARE = [
@@ -134,3 +137,26 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly'
+    ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.'
+                                'PageNumberPagination',
+    'PAGE_SIZE': 10,
+
+}
+
+DJOSER = {
+    "LOGIN_FIELD": 'email',
+    'SERIALIZERS': {
+        'current_user': 'users.api.serializers.UserSerializer',
+        'user': 'users.api.serializers.UserIdSerializer',
+        'user_create': 'users.api.serializers.UserCreateSerializer',
+    },
+}
