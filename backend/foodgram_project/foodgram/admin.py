@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.db import models
 from django.forms import CheckboxSelectMultiple
 
-from .models import Favorites, Ingredient, Recipe, Subscription, Tag
+from .models import (Favorites, Ingredient, IngredientAmount, Recipe,
+                     ShoppingCart, Subscription, Tag)
 
 COUNT_DISPLAY_INGREDIENT = 100
 COUNT_DISPLAY_RECIPE = 50
@@ -15,17 +16,26 @@ class FavoritesAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('name', 'measurement_unit')
+    list_display = ('id', 'name', 'measurement_unit')
     list_filter = ('name',)
     list_per_page = COUNT_DISPLAY_INGREDIENT
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    formfield_overrides = {models.ManyToManyField: {
-        'widget': CheckboxSelectMultiple}}
+    # formfield_overrides = {models.ManyToManyField: {
+    #     'widget': CheckboxSelectMultiple}}
     list_display = ('name', 'author')
     list_filter = ('name', 'author', 'tags',)
+    list_per_page = COUNT_DISPLAY_RECIPE
+
+
+@admin.register(IngredientAmount)
+class IngredientAmountAdmin(admin.ModelAdmin):
+    # formfield_overrides = {models.ManyToManyField: {
+    #     'widget': CheckboxSelectMultiple}}
+    list_display = ('pk', 'ingredient', 'amount')
+    # list_filter = ('name', 'author', 'tags',)
     list_per_page = COUNT_DISPLAY_RECIPE
 
 
@@ -36,4 +46,8 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('pk', 'name',)
+
+@admin.register(ShoppingCart)
+class ShoppingCartAdmin(admin.ModelAdmin):
+    list_display = ('user', 'recipe',)

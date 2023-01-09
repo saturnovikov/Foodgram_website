@@ -59,13 +59,25 @@ class Recipe(models.Model):
         verbose_name='Автор рецепта'
     )
     tags = models.ManyToManyField(Tag)
-    ingredient = models.ManyToManyField(
+    # ingredients = models.ManyToManyField(
+    #     Ingredient,
+    #     verbose_name='Ингредиент'
+    # )
+    # До новой базы
+    # ingredients = models.ManyToManyField(
+    #     'IngredientAmount',
+    #     verbose_name='Ингредиент',
+    #     related_name='recipe'
+    # )
+    ingredients = models.ManyToManyField(
         Ingredient,
-        verbose_name='Ингредиент'
+        verbose_name='Ингредиент',
+        related_name='recipe',
+        through='amount'
     )
     image = models.ImageField(
         'Фотография',
-        upload_to='foodgram/',
+        upload_to='foodgram/image',
         blank=True,
     )
     text = models.TextField('Описание')
@@ -85,6 +97,31 @@ class Recipe(models.Model):
 
     def __str__(self):
         return f'{self.name}'
+
+
+class Amount(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        verbose_name='Ингредиент')
+    amount = models.CharField(
+        'Количество',
+        max_length=50
+    )
+
+    class Meta:
+        verbose_name = ('Количество ингредиентов')
+        verbose_name_plural = ('Количество ингредиентов')
+        ordering = ['pk']
+        get_latest_by = 'pk'
+
+    def __str__(self):
+        return f'{self.ingredient}'
 
 
 class Favorites(models.Model):
@@ -133,3 +170,27 @@ class Subscription(models.Model):
         ]
         verbose_name = ('Подписки')
         verbose_name_plural = ('Подписки')
+
+
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='in_shoping_cart',
+        verbose_name='Пользователь'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='is_in_shopping_cart',
+        verbose_name='Рецепт'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'], name='user_recipe_shopping_cart'
+            )
+        ]
+        verbose_name = ('Список покупок')
+        verbose_name_plural = ('Список покупок')
