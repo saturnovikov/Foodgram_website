@@ -72,8 +72,8 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         verbose_name='Ингредиент',
-        related_name='recipe',
-        through='amount'
+        # related_name='recipe',
+        through='RecipeIngredient'
     )
     image = models.ImageField(
         'Фотография',
@@ -99,7 +99,7 @@ class Recipe(models.Model):
         return f'{self.name}'
 
 
-class Amount(models.Model):
+class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -121,7 +121,7 @@ class Amount(models.Model):
         get_latest_by = 'pk'
 
     def __str__(self):
-        return f'{self.ingredient}'
+        return f'{self.ingredient}{self.recipe}'
 
 
 class Favorites(models.Model):

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 from django.forms import CheckboxSelectMultiple
 
-from .models import (Favorites, Ingredient, IngredientAmount, Recipe,
+from .models import (Favorites, Ingredient, RecipeIngredient, Recipe,
                      ShoppingCart, Subscription, Tag)
 
 COUNT_DISPLAY_INGREDIENT = 100
@@ -30,11 +30,11 @@ class RecipeAdmin(admin.ModelAdmin):
     list_per_page = COUNT_DISPLAY_RECIPE
 
 
-@admin.register(IngredientAmount)
-class IngredientAmountAdmin(admin.ModelAdmin):
+@admin.register(RecipeIngredient)
+class AmountAdmin(admin.ModelAdmin):
     # formfield_overrides = {models.ManyToManyField: {
     #     'widget': CheckboxSelectMultiple}}
-    list_display = ('pk', 'ingredient', 'amount')
+    list_display = ('pk', 'ingredient') #, 'amount')
     # list_filter = ('name', 'author', 'tags',)
     list_per_page = COUNT_DISPLAY_RECIPE
 

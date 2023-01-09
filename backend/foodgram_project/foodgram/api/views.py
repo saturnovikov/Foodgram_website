@@ -8,11 +8,11 @@ from rest_framework.response import Response
 from foodgram.api.filters import RecipeFilter
 from foodgram.api.serializers import (CreateSubscriptionSerializers,
                                       FavoriteSerializers,
-                                      IngredientAmountSerializers,
+                                      AmountSerializers,
                                       IngredientSerializers, RecipeListSerializers,
                                       ShoppingCartSerializers,
                                       SubscriptionSerializers, TagSerializers)
-from foodgram.models import (Favorites, Ingredient, IngredientAmount, Recipe,
+from foodgram.models import (Favorites, Ingredient, RecipeIngredient, Recipe,
                              ShoppingCart, Tag, User, Subscription)
 
 
@@ -65,7 +65,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             print('JJJJJJJ++++++++', ingredient)
             # IngredientAmount.objects.create(ingredient=ingredient, amount='125')
             # IngredientAmount.objects.create(ingredient=ingredient, amount=i['amount'])
-        ingredients_amount = IngredientAmount.objects.all().reverse()[
+        ingredients_amount = RecipeIngredient.objects.all().reverse()[
             :len(data_ingredients)]
         # ingredients = Ingredient.objects.filter(
         #     ingredientamount__ingredient=1123)
@@ -153,8 +153,8 @@ class DownloadShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class AmountViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = IngredientAmount.objects.all()
-    serializer_class = IngredientAmountSerializers
+    queryset = RecipeIngredient.objects.all()
+    serializer_class = AmountSerializers
 
 
 class ShoppingcartViewSet(CreateDestroyViewSet):

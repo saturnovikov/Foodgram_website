@@ -7,7 +7,7 @@ from django.core.files.base import ContentFile
 from django.db.models import Count
 from rest_framework import serializers  # , status
 
-from foodgram.models import (Favorites, Ingredient, IngredientAmount, Recipe,
+from foodgram.models import (Favorites, Ingredient, RecipeIngredient, Recipe,
                              ShoppingCart, Subscription, Tag)
 from users.api.serializers import UserIdSerializer
 
@@ -38,7 +38,7 @@ class IngredientSerializers(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class IngredientAmountSerializers(serializers.ModelSerializer):
+class AmountSerializers(serializers.ModelSerializer):
     # ingredient = IngredientSerializers()
     id = serializers.CharField(source='ingredient.id')
     name = serializers.CharField(source='ingredient.name')
@@ -46,7 +46,7 @@ class IngredientAmountSerializers(serializers.ModelSerializer):
         source='ingredient.measurement_unit')
 
     class Meta:
-        model = IngredientAmount
+        model = RecipeIngredient
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
@@ -66,7 +66,7 @@ class RecipeListSerializers(serializers.ModelSerializer):
     # image = Base64ImageField(required=False, allow_null=True)
     # ingredients = serializers.SlugRelatedField(many=True, read_only=True, slug_field='')
     # ingredients =serializers.StringRelatedField(many=True, read_only=True)
-    ingredients = IngredientAmountSerializers(many=True)
+    ingredients = AmountSerializers(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
