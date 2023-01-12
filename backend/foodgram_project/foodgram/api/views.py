@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from foodgram.api.filters import RecipeFilter
 from foodgram.api.serializers import (CreateSubscriptionSerializers,
                                       FavoriteSerializers,
-                                      AmountSerializers,
+                                      RecipeIngredientSerializers,
                                       IngredientSerializers, RecipeListSerializers,
                                       ShoppingCartSerializers,
                                       SubscriptionSerializers, TagSerializers)
@@ -50,58 +50,100 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
-    def create(self, request, *args, **kwargs):
-        user = self.request.user
-        # print('TYPE', username)
-        print('self.request', self.request.__dict__)
-        print('REQUEST', request.data)
-        print('125', request.data['ingredients'])
-        data_ingredients = request.data['ingredients']
-        print('INGR', data_ingredients)
-        for i in data_ingredients:
-            # print('PRINT', ingredient=Ingredient.objects.get(id=1))
-            print('iii', i['id'])
-            ingredient = Ingredient.objects.get(id=i['id'])
-            print('JJJJJJJ++++++++', ingredient)
-            # IngredientAmount.objects.create(ingredient=ingredient, amount='125')
-            # IngredientAmount.objects.create(ingredient=ingredient, amount=i['amount'])
-        ingredients_amount = RecipeIngredient.objects.all().reverse()[
-            :len(data_ingredients)]
-        # ingredients = Ingredient.objects.filter(
-        #     ingredientamount__ingredient=1123)
-        # ingredients=IngredientAmount.objects.all().latest()
-        print('values', list(ingredients_amount.values()))
-        print('INGGGGG', ingredients_amount)
-        print(request.data['tags'])
-        # tags = Tag.objects.filter(id__in=request.data['tags'])
-        tags = Tag.objects.filter(id__in=request.data['tags'])
-        print('TAGGGGS', tags)
-        data = request.data
-        # user = get_object_or_404(User, username=self.request.user)
-        # data['author']=user.__dict__
-        user_c = {'email': user.email,
-                  'id': user.id,
-                  'username': user.username,
-                  "first_name": user.first_name,
-                  "last_name": user.last_name
+    # def create(self, request, *args, **kwargs):
+    #     print(request.data['tags'])
+    #     print(request.data['ingredients'])
+    #     # list_id=[]
+    #     # for i in request.data['ingredients']:
+    #     #     list_id.append(i['id'])
+    #     # print(list_id)
+    #     # ingredients = Ingredient.objects.filter(id__in=list_id)
+    #     tags = Tag.objects.filter(id__in=request.data['tags'])
+    #     request.data['tags'] = list(tags.values())
+    #     # request.data['ingredients'] = list(ingredients.values())
+    #     print(125, request.data)
+    #     serializer = self.get_serializer(data=request.data)
+    #     print('serializ')
+    #     serializer.is_valid(raise_exception=True)
+    #     print('is_valid')
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)       
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-                  }
-        print(user_c)
-        data.update({'ingredients': list(ingredients_amount.values())})
-        data.update({'tags': list(tags.values())})
-        data.update({'author': user_c})
-        # user = get_object_or_404(User, username=username)
-        # print('user', user)
-        # data.update({'author':list(user.values())})
+    # def get_serializer_class(self):
+    #     if request.method = 
+    #     return super().get_serializer_class()
 
-        # print(data)
-        serializer = self.get_serializer(data=data)
-        print('serializ')
-        serializer.is_valid(raise_exception=True)
-        print('is_valid')
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        # print(request.data['tags'])
+        # print(*args)
+        # print(**kwargs)
+        # return None
+    # def create(self, request, *args, **kwargs):
+    #     print('REQUEST', request.data)
+    #     data=request.data
+    #     tags = Tag.objects.filter(id__in=request.data['tags'])
+    #     print('TAGGGGS', tags)
+    #     # print(data)
+    #     serializer = self.get_serializer(data=data)
+    #     print('serializ')
+    #     serializer.is_valid(raise_exception=True)
+    #     print('is_valid')
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)       
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    # # ДО НОВОЙ БАЗЫ
+    # def create(self, request, *args, **kwargs):
+    #     user = self.request.user
+    #     # print('TYPE', username)
+    #     print('self.request', self.request.__dict__)
+    #     print('REQUEST', request.data)
+    #     print('125', request.data['ingredients'])
+    #     data_ingredients = request.data['ingredients']
+    #     print('INGR', data_ingredients)
+    #     for i in data_ingredients:
+    #         # print('PRINT', ingredient=Ingredient.objects.get(id=1))
+    #         print('iii', i['id'])
+    #         ingredient = Ingredient.objects.get(id=i['id'])
+    #         print('JJJJJJJ++++++++', ingredient)
+    #         # IngredientAmount.objects.create(ingredient=ingredient, amount='125')
+    #         # IngredientAmount.objects.create(ingredient=ingredient, amount=i['amount'])
+    #     ingredients_amount = RecipeIngredient.objects.all().reverse()[
+    #         :len(data_ingredients)]
+    #     # ingredients = Ingredient.objects.filter(
+    #     #     ingredientamount__ingredient=1123)
+    #     # ingredients=IngredientAmount.objects.all().latest()
+    #     print('values', list(ingredients_amount.values()))
+    #     print('INGGGGG', ingredients_amount)
+    #     print(request.data['tags'])
+    #     # tags = Tag.objects.filter(id__in=request.data['tags'])
+    #     tags = Tag.objects.filter(id__in=request.data['tags'])
+    #     print('TAGGGGS', tags)
+    #     data = request.data
+    #     # user = get_object_or_404(User, username=self.request.user)
+    #     # data['author']=user.__dict__
+    #     user_c = {'email': user.email,
+    #               'id': user.id,
+    #               'username': user.username,
+    #               "first_name": user.first_name,
+    #               "last_name": user.last_name
+
+    #               }
+    #     print(user_c)
+    #     data.update({'ingredients': list(ingredients_amount.values())})
+    #     data.update({'tags': list(tags.values())})
+    #     data.update({'author': user_c})
+    #     # user = get_object_or_404(User, username=username)
+    #     # print('user', user)
+    #     # data.update({'author':list(user.values())})
+
+    #     # print(data)
+    #     serializer = self.get_serializer(data=data)
+    #     print('serializ')
+    #     serializer.is_valid(raise_exception=True)
+    #     print('is_valid')
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
         # data={'125':1, '126':3}
         # data.update({'125':125})
@@ -143,8 +185,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         # return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         # return Response(None)
 
-    # def perform_create(self, serializer):
-    #     serializer.save(author=self.request.username)
+    def perform_create(self, serializer):
+        print('SELFFFF', self.request.data['tags'])
+        tags=self.request.data['tags']
+        serializer.save(author=self.request.user, tags=tags)
 
 
 class DownloadShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
@@ -154,7 +198,7 @@ class DownloadShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
 
 class AmountViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = RecipeIngredient.objects.all()
-    serializer_class = AmountSerializers
+    serializer_class = RecipeIngredientSerializers
 
 
 class ShoppingcartViewSet(CreateDestroyViewSet):
