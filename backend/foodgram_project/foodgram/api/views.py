@@ -230,21 +230,21 @@ class DownloadShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
                       'amount=', amount)
         print(shopping_list)
         # my_data = 'data'
-        my_file = open('media/shopping_file.txt', 'w+')
+        shopping_file = open('media/shopping_file.txt', 'w+')
         for key, value in shopping_list.items():
 
-            my_file.write((f'{key}: {value} \n'))
+            shopping_file.write((f'{key}: {value} \n'))
         # my_file.close()
-        
-        my_file.close()
-        
-        my_file = open('media/shopping_file.txt', 'r')
-        file_contents = my_file.read()
+
+        shopping_file.close()
+
+        shopping_file = open('media/shopping_file.txt', 'r')
+        file_contents = shopping_file.read()
         print(123, file_contents)
         # print(str(shopping_list.items()))
 
-        return HttpResponse(file_contents, headers={  # 'Content-Type': 'application/vnd.txt',
-            'Content-Disposition': 'attachment; filename="shopping_file.txt"'})
+        return HttpResponse(file_contents, headers={'Content-Type': 'text/plain',
+            'Content-Disposition': 'attachment; filename="{}.txt"'.format('shopping_file')})
 
 
 #         response = HttpResponse(my_data, headers={
