@@ -1,19 +1,20 @@
-from django.shortcuts import render
+# from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from foodgram.api.filters import RecipeFilter
 from foodgram.api.serializers import (CreateSubscriptionSerializers,
                                       FavoriteSerializers,
+                                      IngredientSerializers,
                                       RecipeIngredientSerializers,
-                                      IngredientSerializers, RecipeListSerializers,
+                                      RecipeListSerializers,
                                       ShoppingCartSerializers,
                                       SubscriptionSerializers, TagSerializers)
-from foodgram.models import (Favorites, Ingredient, RecipeIngredient, Recipe,
-                             ShoppingCart, Tag, User, Subscription)
+from foodgram.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
+                             ShoppingCart, Subscription, Tag, User)
 
 
 class CreateDestroyViewSet(mixins.CreateModelMixin,
@@ -67,17 +68,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
     #     serializer.is_valid(raise_exception=True)
     #     print('is_valid')
     #     self.perform_create(serializer)
-    #     headers = self.get_success_headers(serializer.data)       
+    #     headers = self.get_success_headers(serializer.data)
     #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     # def get_serializer_class(self):
-    #     if request.method = 
+    #     if request.method =
     #     return super().get_serializer_class()
 
-        # print(request.data['tags'])
-        # print(*args)
-        # print(**kwargs)
-        # return None
+    # print(request.data['tags'])
+    # print(*args)
+    # print(**kwargs)
+    # return None
     # def create(self, request, *args, **kwargs):
     #     print('REQUEST', request.data)
     #     data=request.data
@@ -89,7 +90,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     #     serializer.is_valid(raise_exception=True)
     #     print('is_valid')
     #     self.perform_create(serializer)
-    #     headers = self.get_success_headers(serializer.data)       
+    #     headers = self.get_success_headers(serializer.data)
     #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     # # ДО НОВОЙ БАЗЫ
     # def create(self, request, *args, **kwargs):
@@ -145,11 +146,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     #     headers = self.get_success_headers(serializer.data)
     #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-        # data={'125':1, '126':3}
-        # data.update({'125':125})
-        # data['126']=555
-        # print(data)
-        # print(Recipe.objects.filter(ingredients__amount=5).count())
+    # data={'125':1, '126':3}
+    # data.update({'125':125})
+    # data['126']=555
+    # print(data)
+    # print(Recipe.objects.filter(ingredients__amount=5).count())
     #     following_id = kwargs.get('pk')
     #     print(following_id)
     #     username = self.request.user
@@ -182,12 +183,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
     #     print('data2==', serializer.data)
     #     headers = self.get_success_headers(serializer.data)
     #     Subscription.objects.create(user=user, following=following)
-        # return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-        # return Response(None)
+    # return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    # return Response(None)
 
     def perform_create(self, serializer):
         print('SELFFFF', self.request.data['tags'])
-        tags=self.request.data['tags']
+        tags = self.request.data['tags']
+        serializer.save(author=self.request.user, tags=tags)
+    
+    def perform_update(self, serializer):
+        print('SELFFFF UPDATE', self.request.data['tags'])
+        tags = self.request.data['tags']
         serializer.save(author=self.request.user, tags=tags)
 
 
@@ -215,7 +221,8 @@ class ShoppingcartViewSet(CreateDestroyViewSet):
         # self.perform_destroy(instance)
         if not ShoppingCart.objects.filter(user=username,
                                            recipe=recipe).exists():
-            return Response(data={'detail': 'Нет рецепта в корзине'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={'detail': 'Нет рецепта в корзине'},
+                            status=status.HTTP_400_BAD_REQUEST)
         ShoppingCart.objects.get(user=username, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -248,7 +255,8 @@ class ShoppingcartViewSet(CreateDestroyViewSet):
         # print(serializer.data)
         headers = self.get_success_headers(serializer.data)
         ShoppingCart.objects.create(user=username, recipe=recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
 
     # def create(self, request, *args, **kwargs):
     #     serializer = self.get_serializer(data=request.data)
@@ -297,8 +305,10 @@ class FavoriteViewSet(CreateDestroyViewSet):
         username = self.request.user
         recipe = get_object_or_404(Recipe, id=recipe_id)
         if Favorites.objects.filter(user=username, recipe=recipe).exists():
-            return Response(data={'errors': 'Данный рецепт уже добавлен в избранное'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={
+                'errors': 'Данный рецепт уже добавлен в избранное'
+            },
+                status=status.HTTP_400_BAD_REQUEST)
         serializer = FavoriteSerializers(
             data={'id': recipe.id, 'name': recipe.name,
                   'cooking_time': recipe.cooking_time,
@@ -307,10 +317,11 @@ class FavoriteViewSet(CreateDestroyViewSet):
         serializer.is_valid(raise_exception=True)
         headers = self.get_success_headers(serializer.data)
         Favorites.objects.create(user=username, recipe=recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
 
-    def perform_create(self, serializer):
-        serializer.save()
+    # def perform_create(self, serializer):
+    #     serializer.save()
 
 
 class SubscriptionViewSet(CreateDestroyListRetriveViewSet):
@@ -332,7 +343,8 @@ class SubscriptionViewSet(CreateDestroyListRetriveViewSet):
         user = get_object_or_404(User, username=username)
         if not Subscription.objects.filter(user=user,
                                            following=following).exists():
-            return Response(data={'detail': 'Подписки на данного автора нет'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={'detail': 'Подписки на данного автора нет'},
+                            status=status.HTTP_400_BAD_REQUEST)
         Subscription.objects.get(user=username, following=following).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -347,19 +359,24 @@ class SubscriptionViewSet(CreateDestroyListRetriveViewSet):
         print('id= ', following.id)
         user = get_object_or_404(User, username=username)
         print(33, user)
-        if Subscription.objects.filter(user=user, following=following).exists():
+        if Subscription.objects.filter(user=user,
+                                       following=following).exists():
             return Response(data={'errors': 'Подписка уже существует'},
                             status=status.HTTP_400_BAD_REQUEST)
         if username == following:
-            return Response(data={'errors': 'Нельзя подписаться на самого себя'},
+            return Response(data={'errors':
+                                  'Нельзя подписаться на самого себя'},
                             status=status.HTTP_400_BAD_REQUEST)
 
         # serializer = SubscriptionSerializers(
+        # serializer = self.get_serializer(data=request.data)
         serializer = CreateSubscriptionSerializers(
             data={'email': following.email, 'id': following.id,
-                  'username': following.username, 'first_name': following.first_name,
+                  'username': following.username,
+                  'first_name': following.first_name,
                   'last_name': following.last_name}
-            # {'email':following.email, 'id': following.id, 'username': following,
+            # {'email':following.email, 'id': following.id,
+            # 'username': following,
             #       'cooking_time': recipe.cooking_time,
             #       'image': recipe.image}
         )
@@ -370,7 +387,8 @@ class SubscriptionViewSet(CreateDestroyListRetriveViewSet):
         print('data2==', serializer.data)
         headers = self.get_success_headers(serializer.data)
         Subscription.objects.create(user=user, following=following)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
 
-    def perform_create(self, serializer):
-        serializer.save()
+    # def perform_create(self, serializer):
+    #     serializer.save()

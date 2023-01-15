@@ -1,7 +1,6 @@
 import django_filters as filters
-# from rest_framework import filters
-from foodgram.models import Recipe, Favorites
 
+from foodgram.models import Recipe
 
 
 class RecipeFilter(filters.FilterSet):
@@ -11,9 +10,9 @@ class RecipeFilter(filters.FilterSet):
     tags = filters.CharFilter(
         field_name='tags__name',
     )
-    is_in_shopping_cart = filters.CharFilter(method='filter_is_in_shopping_cart')
+    is_in_shopping_cart = filters.CharFilter(
+        method='filter_is_in_shopping_cart')
     is_favorited = filters.CharFilter(method='filter_is_favorited')
-
 
     class Meta:
         model = Recipe
