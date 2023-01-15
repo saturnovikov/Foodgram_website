@@ -109,9 +109,8 @@ class RecipeIngredient(models.Model):
         Ingredient,
         on_delete=models.CASCADE,
         verbose_name='Ингредиент')
-    amount = models.CharField(
-        'Количество',
-        max_length=50
+    amount = models.PositiveSmallIntegerField(
+        'Количество',      
     )
 
     class Meta:

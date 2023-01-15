@@ -9,10 +9,10 @@ router_v1 = DefaultRouter()
 
 router_v1.register('tags', TagViewSet, basename='tags')
 router_v1.register('ingredient', IngredientViewSet, basename='ingredient')
-router_v1.register('recipes', RecipeViewSet, basename='recipes')
 router_v1.register('recipes/download_shopping_cart',
                    DownloadShoppingCartViewSet,
                    basename='download_shopping_cart')
+router_v1.register('recipes', RecipeViewSet, basename='recipes')
 # router_v1.register(r'recipes\/(?P<id>\d+)/shopping_cart',
 #                    ShoppingcartViewSet, basename='shopping_cart')
 router_v1.register('amount', AmountViewSet, basename='amount')

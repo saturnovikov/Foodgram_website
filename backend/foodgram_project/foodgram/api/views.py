@@ -1,4 +1,6 @@
 # from django.shortcuts import render
+from django.core.files.base import ContentFile
+from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.generics import get_object_or_404
@@ -190,7 +192,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         print('SELFFFF', self.request.data['tags'])
         tags = self.request.data['tags']
         serializer.save(author=self.request.user, tags=tags)
-    
+
     def perform_update(self, serializer):
         print('SELFFFF UPDATE', self.request.data['tags'])
         tags = self.request.data['tags']
@@ -199,7 +201,63 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 class DownloadShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
     """Д"""
-    pass
+    queryset = ShoppingCart.objects.all()
+    serializer_class = ShoppingCartSerializers
+    # @action(detail=False, url_patch=)
+
+    def list(self, request):
+        shopping_list = {}
+        print('OOOOOPPPPP', type(self.request.user))
+        obj = ShoppingCart.objects.prefetch_related(
+            'recipe').filter(user=self.request.user)
+        if not obj.exists():
+            return Response(data='Нет рецептов в списке покупок',
+                            status=status.HTTP_400_BAD_REQUEST)
+        # obj_2 = ShoppingCart.objects.filter(user=self.request.user)
+        print('OBJ', obj)
+        print(obj[0].recipe)
+        for shoppingcart in obj:
+            ingr = RecipeIngredient.objects.select_related(
+                'ingredient').filter(recipe=shoppingcart.recipe)
+            for recipeingr in ingr:
+                name = recipeingr.ingredient.name
+                amount = recipeingr.amount
+                if recipeingr.ingredient.name not in shopping_list:
+                    shopping_list[name] = amount
+                else:
+                    shopping_list[name] = shopping_list[name] + (amount)
+                print('name= ', name,
+                      'amount=', amount)
+        print(shopping_list)
+        # my_data = 'data'
+        my_file = open('media/shopping_file.txt', 'w+')
+        for key, value in shopping_list.items():
+
+            my_file.write((f'{key}: {value} \n'))
+        # my_file.close()
+        
+        my_file.close()
+        
+        my_file = open('media/shopping_file.txt', 'r')
+        file_contents = my_file.read()
+        print(123, file_contents)
+        # print(str(shopping_list.items()))
+
+        return HttpResponse(file_contents, headers={  # 'Content-Type': 'application/vnd.txt',
+            'Content-Disposition': 'attachment; filename="shopping_file.txt"'})
+
+
+#         response = HttpResponse(my_data, headers={
+# ...     'Content-Type': 'application/vnd.ms-excel',
+# ...     'Content-Disposition': 'attachment; filename="foo.xls"',
+# ... })
+        # ingr = RecipeIngredient.objects.select_related(
+        #     'ingredient').filter(recipe=obj[0].recipe)
+        # ingr = RecipeIngredient.objects.filter(recipe=obj[0].recipe)
+        # print('name= ', ingr[0].ingredient.name,
+        #       'amount=', ingr[0].amount)
+        # print('OBJ_22222222', obj_2)
+        # print(obj_2[0].recipe)
 
 
 class AmountViewSet(viewsets.ReadOnlyModelViewSet):
