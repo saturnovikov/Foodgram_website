@@ -203,6 +203,7 @@ class DownloadShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
     """Д"""
     queryset = ShoppingCart.objects.all()
     serializer_class = ShoppingCartSerializers
+    permission_classes = [IsAuthenticated]
     # @action(detail=False, url_patch=)
 
     def list(self, request):
@@ -231,6 +232,9 @@ class DownloadShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
         print(shopping_list)
         # my_data = 'data'
         shopping_file = open('media/shopping_file.txt', 'w+')
+        shopping_file.write((f'{self.request.user}. \n'
+                             'Список покупок для выбранных рецептов. \n'
+                             '________________________________________\n'))
         for key, value in shopping_list.items():
 
             shopping_file.write((f'{key}: {value} \n'))
@@ -243,8 +247,8 @@ class DownloadShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
         print(123, file_contents)
         # print(str(shopping_list.items()))
 
-        return HttpResponse(file_contents, headers={'Content-Type': 'text/plain',
-            'Content-Disposition': 'attachment; filename="{}.txt"'.format('shopping_file')})
+        return HttpResponse(file_contents, headers={'Content-Type': 'application/pdf',
+                                                    'Content-Disposition': 'attachment; filename="{}.pdf"'.format('shopping_file')})
 
 
 #         response = HttpResponse(my_data, headers={
