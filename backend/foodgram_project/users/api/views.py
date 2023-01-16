@@ -15,4 +15,4 @@ class UsersView(views.UserViewSet):
         user = request.user
         if request.method == "GET":
             serializer = self.get_serializer(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)

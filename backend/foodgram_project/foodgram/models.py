@@ -59,16 +59,6 @@ class Recipe(models.Model):
         verbose_name='Автор рецепта'
     )
     tags = models.ManyToManyField(Tag)
-    # ingredients = models.ManyToManyField(
-    #     Ingredient,
-    #     verbose_name='Ингредиент'
-    # )
-    # До новой базы
-    # ingredients = models.ManyToManyField(
-    #     'IngredientAmount',
-    #     verbose_name='Ингредиент',
-    #     related_name='recipe'
-    # )
     ingredients = models.ManyToManyField(
         Ingredient,
         verbose_name='Ингредиент',
@@ -110,7 +100,7 @@ class RecipeIngredient(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Ингредиент')
     amount = models.PositiveSmallIntegerField(
-        'Количество',      
+        'Количество',
     )
 
     class Meta:
@@ -120,7 +110,7 @@ class RecipeIngredient(models.Model):
         get_latest_by = 'pk'
 
     def __str__(self):
-        return f'{self.ingredient}{self.recipe}'
+        return f'{self.ingredient} в {self.recipe}'
 
 
 class Favorites(models.Model):
