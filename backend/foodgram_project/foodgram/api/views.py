@@ -1,12 +1,13 @@
 # from django.shortcuts import render
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from foodgram.api.filters import RecipeFilter
+from foodgram.api.filters import IngredientsFilter, RecipeFilter
 from foodgram.api.serializers import (CreateSubscriptionSerializers,
                                       FavoriteSerializers,
                                       IngredientSerializers,
@@ -41,8 +42,9 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializers
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('^name',)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientsFilter
+    search_fields = ['^name']
     pagination_class = None
 
 
@@ -61,42 +63,78 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, tags=tags)
 
 
-class DownloadShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = ShoppingCart.objects.all()
-    serializer_class = ShoppingCartSerializers
-    permission_classes = [IsAuthenticated]
+# class DownloadShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
+#     queryset = ShoppingCart.objects.all()
+#     serializer_class = ShoppingCartSerializers
+#     permission_classes = [IsAuthenticated]
 
-    def list(self, request):
-        shopping_list = {}
-        obj = ShoppingCart.objects.prefetch_related(
-            'recipe').filter(user=self.request.user)
-        if not obj.exists():
-            return Response(data='Нет рецептов в списке покупок',
-                            status=status.HTTP_400_BAD_REQUEST)
-        for shoppingcart in obj:
-            ingr = RecipeIngredient.objects.select_related(
-                'ingredient').filter(recipe=shoppingcart.recipe)
-            for recipeingr in ingr:
-                name = recipeingr.ingredient.name
-                amount = recipeingr.amount
-                if recipeingr.ingredient.name not in shopping_list:
-                    shopping_list[name] = amount
-                else:
-                    shopping_list[name] = shopping_list[name] + (amount)
-        shopping_file = open('media/shopping_file.txt', 'w+')
-        shopping_file.write((f'{self.request.user}. \n'
-                             'Список покупок для выбранных рецептов. \n'
-                             '________________________________________\n'))
-        for key, value in shopping_list.items():
-            shopping_file.write((f'{key}: {value} \n'))
-        shopping_file.close()
-        shopping_file = open('media/shopping_file.txt', 'r')
-        file_contents = shopping_file.read()
-        file_name = 'shopping_file'
-        return HttpResponse(file_contents,
-                            headers={'Content-Type': 'text/plain',
-                                     'Content-Disposition': 'attachment;'
-                                     'filename="{}.txt"'.format(file_name)})
+#     def list(self, request):
+#         shopping_list = {}
+#         obj = ShoppingCart.objects.prefetch_related(
+#             'recipe').filter(user=self.request.user)
+#         if not obj.exists():
+#             return Response(data='Нет рецептов в списке покупок',
+#                             status=status.HTTP_400_BAD_REQUEST)
+#         for shoppingcart in obj:
+#             ingr = RecipeIngredient.objects.select_related(
+#                 'ingredient').filter(recipe=shoppingcart.recipe)
+#             for recipeingr in ingr:
+#                 name = recipeingr.ingredient.name
+#                 amount = recipeingr.amount
+#                 if recipeingr.ingredient.name not in shopping_list:
+#                     shopping_list[name] = amount
+#                 else:
+#                     shopping_list[name] = shopping_list[name] + (amount)
+#         shopping_file = open('media/shopping_file.txt', 'w+')
+#         shopping_file.write((f'{self.request.user}. \n'
+#                              'Список покупок для выбранных рецептов. \n'
+#                              '________________________________________\n'))
+#         for key, value in shopping_list.items():
+#             shopping_file.write((f'{key}: {value} \n'))
+#         shopping_file.close()
+#         shopping_file = open('media/shopping_file.txt', 'r')
+#         file_contents = shopping_file.read()
+#         file_name = 'shopping_file'
+#         return HttpResponse(file_contents,
+#                             headers={'Content-Type': 'text/plain',
+#                                      'Content-Disposition': 'attachment;'
+#                                      'filename="{}.txt"'.format(file_name)})
+
+
+@api_view(['GET'])
+def download_shopping_cart(request):
+    shopping_list = {}
+    obj_shoppingcart = ShoppingCart.objects.prefetch_related(
+        'recipe').filter(user=request.user)
+    # print(obj_shoppingcart[0].__dict__)
+    if not obj_shoppingcart.exists():
+        return Response(data='Нет рецептов в списке покупок',
+                        status=status.HTTP_400_BAD_REQUEST)
+    for shoppingcart in obj_shoppingcart:
+        ingredients = RecipeIngredient.objects.select_related(
+            'ingredient').filter(recipe=shoppingcart.recipe)
+        print('INGR', ingredients)
+        for ingredientinrecipe in ingredients:
+            name = ingredientinrecipe.ingredient.name
+            amount = ingredientinrecipe.amount
+            if ingredientinrecipe.ingredient.name not in shopping_list:
+                shopping_list[name] = amount
+            else:
+                shopping_list[name] = shopping_list[name] + (amount)
+    shopping_file = open('media/shopping_file.txt', 'w+')
+    shopping_file.write((f'{request.user}. \n'
+                         'Список покупок для выбранных рецептов. \n'
+                         '________________________________________\n'))
+    for key, value in shopping_list.items():
+        shopping_file.write((f'{key}: {value} \n'))
+    shopping_file.close()
+    shopping_file = open('media/shopping_file.txt', 'r')
+    file_contents = shopping_file.read()
+    file_name = 'shopping_file'
+    return HttpResponse(file_contents,
+                        headers={'Content-Type': 'text/plain',
+                                 'Content-Disposition': 'attachment;'
+                                 'filename="{}.txt"'.format(file_name)})
 
 
 class AmountViewSet(viewsets.ReadOnlyModelViewSet):
@@ -137,9 +175,6 @@ class ShoppingcartViewSet(CreateDestroyViewSet):
         ShoppingCart.objects.create(user=username, recipe=recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED,
                         headers=headers)
-
-    def perform_create(self, serializer):
-        serializer.save()
 
 
 class FavoriteViewSet(CreateDestroyViewSet):

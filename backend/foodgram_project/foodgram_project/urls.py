@@ -21,10 +21,10 @@ from django.urls import include, path, re_path
 from foodgram.api.views import SubscriptionViewSet
 
 urlpatterns = [
-    path('api/users/subscriptions',
+    path('api/users/subscriptions/',
          SubscriptionViewSet.as_view({'get': 'list'}),
          name='get_subscriptions'),
-    re_path(r'api/users\/(?P<pk>\d+)/subscribe',
+    re_path(r'api/users\/(?P<pk>\d+)/subscribe/',
             SubscriptionViewSet.as_view(
                 {'post': 'create', 'delete': 'destroy'}),
             name='subscribe'),
