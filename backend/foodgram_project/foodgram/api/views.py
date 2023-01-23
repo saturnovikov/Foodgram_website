@@ -1,4 +1,3 @@
-# from django.shortcuts import render
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status, viewsets
@@ -63,50 +62,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, tags=tags)
 
 
-# class DownloadShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
-#     queryset = ShoppingCart.objects.all()
-#     serializer_class = ShoppingCartSerializers
-#     permission_classes = [IsAuthenticated]
-
-#     def list(self, request):
-#         shopping_list = {}
-#         obj = ShoppingCart.objects.prefetch_related(
-#             'recipe').filter(user=self.request.user)
-#         if not obj.exists():
-#             return Response(data='Нет рецептов в списке покупок',
-#                             status=status.HTTP_400_BAD_REQUEST)
-#         for shoppingcart in obj:
-#             ingr = RecipeIngredient.objects.select_related(
-#                 'ingredient').filter(recipe=shoppingcart.recipe)
-#             for recipeingr in ingr:
-#                 name = recipeingr.ingredient.name
-#                 amount = recipeingr.amount
-#                 if recipeingr.ingredient.name not in shopping_list:
-#                     shopping_list[name] = amount
-#                 else:
-#                     shopping_list[name] = shopping_list[name] + (amount)
-#         shopping_file = open('media/shopping_file.txt', 'w+')
-#         shopping_file.write((f'{self.request.user}. \n'
-#                              'Список покупок для выбранных рецептов. \n'
-#                              '________________________________________\n'))
-#         for key, value in shopping_list.items():
-#             shopping_file.write((f'{key}: {value} \n'))
-#         shopping_file.close()
-#         shopping_file = open('media/shopping_file.txt', 'r')
-#         file_contents = shopping_file.read()
-#         file_name = 'shopping_file'
-#         return HttpResponse(file_contents,
-#                             headers={'Content-Type': 'text/plain',
-#                                      'Content-Disposition': 'attachment;'
-#                                      'filename="{}.txt"'.format(file_name)})
-
-
 @api_view(['GET'])
 def download_shopping_cart(request):
     shopping_list = {}
     obj_shoppingcart = ShoppingCart.objects.prefetch_related(
         'recipe').filter(user=request.user)
-    # print(obj_shoppingcart[0].__dict__)
     if not obj_shoppingcart.exists():
         return Response(data='Нет рецептов в списке покупок',
                         status=status.HTTP_400_BAD_REQUEST)

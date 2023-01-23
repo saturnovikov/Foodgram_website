@@ -8,8 +8,6 @@ class RecipeFilter(filters.FilterSet):
         field_name='author__username',
     )
     tags = filters.CharFilter(
-        # field_name='tags__slug',
-        # lookup_expr='icontains',
         method='filter_tags'
     )
     is_in_shopping_cart = filters.CharFilter(
@@ -21,9 +19,6 @@ class RecipeFilter(filters.FilterSet):
         fields = ('author', 'tags', 'is_favorited', 'is_in_shopping_cart',)
 
     def filter_tags(self, queryset, name, value):
-        # print(value)
-        # print('DATA', self.data.getlist('tags'))
-        # print('SELF', self.__dict__)
         if value:
             return queryset.filter(
                 tags__slug__in=self.data.getlist('tags')).distinct()

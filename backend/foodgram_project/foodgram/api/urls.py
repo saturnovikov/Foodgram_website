@@ -1,19 +1,15 @@
 from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
 
-from foodgram.api.views import (AmountViewSet, download_shopping_cart,
-                                FavoriteViewSet, IngredientViewSet,
-                                RecipeViewSet, ShoppingcartViewSet, TagViewSet)
+from foodgram.api.views import (AmountViewSet, FavoriteViewSet,
+                                IngredientViewSet, RecipeViewSet,
+                                ShoppingcartViewSet, TagViewSet,
+                                download_shopping_cart)
 
 router_v1 = DefaultRouter()
 
 router_v1.register('tags', TagViewSet, basename='tags')
 router_v1.register('ingredients', IngredientViewSet, basename='ingredient')
-# router_v1.register('recipes/download_shopping_cart',
-#                    DownloadShoppingCartViewSet,
-#                    basename='download_shopping_cart')
-# router_v1.register('recipes/download_shopping_cart', download_shopping_cart,
-# basename='download_shopping_cart')
 router_v1.register('recipes', RecipeViewSet, basename='recipes')
 router_v1.register('amount', AmountViewSet, basename='amount')
 
