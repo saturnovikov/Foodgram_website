@@ -1,7 +1,7 @@
+from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, status, viewsets
-from rest_framework.decorators import api_view
+from rest_framework import status, viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,27 +9,14 @@ from rest_framework.response import Response
 from foodgram.api.filters import IngredientsFilter, RecipeFilter
 from foodgram.api.serializers import (CreateSubscriptionSerializers,
                                       FavoriteSerializers,
-                                      IngredientSerializers,
-                                      RecipeIngredientSerializers,
-                                      RecipeListSerializers,
+                                      IngredientSerializers, RecipeSerializers,
                                       ShoppingCartSerializers,
                                       SubscriptionSerializers, TagSerializers)
-from foodgram.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
-                             ShoppingCart, Subscription, Tag, User)
-
-
-class CreateDestroyViewSet(mixins.CreateModelMixin,
-                           mixins.DestroyModelMixin,
-                           viewsets.GenericViewSet):
-    pass
-
-
-class CreateDestroyListRetriveViewSet(mixins.CreateModelMixin,
-                                      mixins.RetrieveModelMixin,
-                                      mixins.DestroyModelMixin,
-                                      mixins.ListModelMixin,
-                                      viewsets.GenericViewSet):
-    pass
+from foodgram.api.utils import create_utils, destroy_utils
+from foodgram.api.viewsets import (CreateDestroyListRetriveViewSet,
+                                   CreateDestroyViewSet)
+from foodgram.models import (Favorite, Ingredient, Recipe, ShoppingCart,
+                             Subscription, Tag, User)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -49,7 +36,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeListSerializers
+    serializer_class = RecipeSerializers
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
@@ -62,120 +49,76 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, tags=tags)
 
 
-@api_view(['GET'])
-def download_shopping_cart(request):
-    shopping_list = {}
-    obj_shoppingcart = ShoppingCart.objects.prefetch_related(
-        'recipe').filter(user=request.user)
-    if not obj_shoppingcart.exists():
-        return Response(data='Нет рецептов в списке покупок',
-                        status=status.HTTP_400_BAD_REQUEST)
-    for shoppingcart in obj_shoppingcart:
-        ingredients = RecipeIngredient.objects.select_related(
-            'ingredient').filter(recipe=shoppingcart.recipe)
-        print('INGR', ingredients)
-        for ingredientinrecipe in ingredients:
-            name = ingredientinrecipe.ingredient.name
-            amount = ingredientinrecipe.amount
-            if ingredientinrecipe.ingredient.name not in shopping_list:
-                shopping_list[name] = amount
-            else:
-                shopping_list[name] = shopping_list[name] + (amount)
-    shopping_file = open('media/shopping_file.txt', 'w+')
-    shopping_file.write((f'{request.user}. \n'
-                         'Список покупок для выбранных рецептов. \n'
-                         '________________________________________\n'))
-    for key, value in shopping_list.items():
-        shopping_file.write((f'{key}: {value} \n'))
-    shopping_file.close()
-    shopping_file = open('media/shopping_file.txt', 'r')
-    file_contents = shopping_file.read()
-    file_name = 'shopping_file'
-    return HttpResponse(file_contents,
-                        headers={'Content-Type': 'text/plain',
-                                 'Content-Disposition': 'attachment;'
-                                 'filename="{}.txt"'.format(file_name)})
+class DownloadShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
 
-
-class AmountViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = RecipeIngredient.objects.all()
-    serializer_class = RecipeIngredientSerializers
+    def list(self, request):
+        foodstuffs = {}
+        objs_shoppingcart = ShoppingCart.objects.prefetch_related(
+            'recipe').filter(user=self.request.user)
+        if not objs_shoppingcart.exists():
+            return Response(data='Нет рецептов в списке покупок',
+                            status=status.HTTP_400_BAD_REQUEST)
+        id_ingredients = objs_shoppingcart.values_list('recipe__ingredients')
+        id_recipes = objs_shoppingcart.values_list('recipe')
+        ingredients = Ingredient.objects.filter(
+            recipeingredient__ingredient__in=id_ingredients,
+            recipeingredient__recipe__in=id_recipes).annotate(
+                sum_amount=Sum('recipeingredient__amount'))
+        for ingredient in ingredients:
+            name = ingredient.name
+            amount = ingredient.sum_amount
+            foodstuffs[name] = amount
+        contents = (f'{self.request.user}. \n'
+                    'Список покупок для выбранных рецептов. \n'
+                    '________________________________________\n')
+        for key, value in foodstuffs.items():
+            contents += (f'{key}: {value} \n')
+        file_name = f'{self.request.user}_shopping_file'
+        return HttpResponse(contents,
+                            headers={'Content-Type': 'text/plain',
+                                     'Content-Disposition': 'attachment;'
+                                     'filename="{}.txt"'.format(file_name)})
 
 
 class ShoppingcartViewSet(CreateDestroyViewSet):
     queryset = ShoppingCart.objects.all()
     serializer_class = ShoppingCartSerializers
+    permission_classes = [IsAuthenticated]
 
     def destroy(self, request, *args, **kwargs):
-        recipe_id = self.kwargs.get('pk')
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        username = self.request.user
-        if not ShoppingCart.objects.filter(user=username,
-                                           recipe=recipe).exists():
-            return Response(data={'detail': 'Нет рецепта в корзине'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        ShoppingCart.objects.get(user=username, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return destroy_utils(self=self,
+                             model=ShoppingCart,
+                             text_error='Нет рецепта в корзине')
 
     def create(self, request, *args, **kwargs):
-        recipe_id = kwargs.get('pk')
-        username = self.request.user
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        if ShoppingCart.objects.filter(user=username, recipe=recipe).exists():
-            return Response(
-                data={'detail': 'Данный рецепт уже добавлен в корзину'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        serializer = ShoppingCartSerializers(
-            data={'id': recipe.id, 'name': recipe.name,
-                  'cooking_time': recipe.cooking_time, 'image': recipe.image}
-        )
-        serializer.is_valid(raise_exception=True)
-        headers = self.get_success_headers(serializer.data)
-        ShoppingCart.objects.create(user=username, recipe=recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED,
-                        headers=headers)
+        return create_utils(self=self,
+                            model=ShoppingCart,
+                            text_error='Данный рецепт уже добавлен в корзину',
+                            kwargs=kwargs)
 
 
 class FavoriteViewSet(CreateDestroyViewSet):
-    queryset = Favorites.objects.all()
+    queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializers
+    permission_classes = [IsAuthenticated]
 
     def destroy(self, request, *args, **kwargs):
-        recipe_id = self.kwargs.get('pk')
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        username = self.request.user
-        if not Favorites.objects.filter(user=username,
-                                        recipe=recipe).exists():
-            return Response(data={'errors': 'Нет рецепта в избранном'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        Favorites.objects.get(user=username, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return destroy_utils(self=self,
+                             model=Favorite,
+                             text_error='Нет рецепта в избранном')
 
     def create(self, request, *args, **kwargs):
-        recipe_id = kwargs.get('pk')
-        username = self.request.user
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        if Favorites.objects.filter(user=username, recipe=recipe).exists():
-            return Response(data={
-                'errors': 'Данный рецепт уже добавлен в избранное'
-            },
-                status=status.HTTP_400_BAD_REQUEST)
-        serializer = FavoriteSerializers(
-            data={'id': recipe.id, 'name': recipe.name,
-                  'cooking_time': recipe.cooking_time,
-                  'image': recipe.image}
-        )
-        serializer.is_valid(raise_exception=True)
-        headers = self.get_success_headers(serializer.data)
-        Favorites.objects.create(user=username, recipe=recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED,
-                        headers=headers)
+        return create_utils(self=self,
+                            model=Favorite,
+                            text_error=('Данный рецепт уже добавлен '
+                                        'в избранное'),
+                            kwargs=kwargs)
 
 
 class SubscriptionViewSet(CreateDestroyListRetriveViewSet):
     serializer_class = SubscriptionSerializers
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Subscription.objects.filter(user=self.request.user)

@@ -108,12 +108,17 @@ class RecipeIngredient(models.Model):
         verbose_name_plural = ('Количество ингредиентов')
         ordering = ['pk']
         get_latest_by = 'pk'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'recipe'], name='ingredientrecipe'
+            )
+        ]
 
     def __str__(self):
         return f'{self.ingredient} в {self.recipe}'
 
 
-class Favorites(models.Model):
+class Favorite(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
