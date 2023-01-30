@@ -99,6 +99,12 @@ class RecipeSerializers(serializers.ModelSerializer):
             instance=instance, validated_data=validated_data)
 
 
+class RecipesmallSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
 class ShoppingCartSerializers(serializers.ModelSerializer):
     id = serializers.CharField(required=False)
     name = serializers.CharField(required=False)
@@ -133,17 +139,12 @@ class SubscriptionSerializers(serializers.Serializer):
     last_name = serializers.CharField(
         source='following.last_name', required=False)
     is_subscribed = serializers.BooleanField(default=True)
-    recipes = serializers.SerializerMethodField(read_only=True,
-                                                required=False)
+    recipe = RecipesmallSerializers(source='following.recipes', many=True)
     recipes_count = serializers.SerializerMethodField(
         read_only=True, required=False)
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.following_id).count()
-
-    def get_recipes(self, obj):
-        recipes = Recipe.objects.filter(author=obj.following_id)
-        return recipes.values('id', 'name', 'image', 'cooking_time')
 
 
 class CreateSubscriptionSerializers(serializers.Serializer):

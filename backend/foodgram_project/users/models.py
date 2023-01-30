@@ -16,7 +16,7 @@ class User(AbstractUser):
         'Username',
         max_length=150,
         unique=True,
-        validators=[USERNAME_REGEX]
+        validators=[USERNAME_REGEX],
     )
     email = models.EmailField(
         max_length=254,

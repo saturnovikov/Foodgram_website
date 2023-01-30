@@ -26,7 +26,7 @@ def create_utils(self, model, text_error, kwargs):
             data={'detail': text_error},
             status=status.HTTP_400_BAD_REQUEST
         )
-    serializer = self.serializer(
+    serializer = self.serializer_class(
         data={'id': recipe.id, 'name': recipe.name,
               'cooking_time': recipe.cooking_time, 'image': recipe.image}
     )

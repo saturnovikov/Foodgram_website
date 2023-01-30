@@ -5,7 +5,7 @@ from foodgram.models import Ingredient, Recipe
 
 class RecipeFilter(filters.FilterSet):
     author = filters.CharFilter(
-        field_name='author__username',
+        field_name='author__id',
     )
     tags = filters.CharFilter(
         method='filter_tags'

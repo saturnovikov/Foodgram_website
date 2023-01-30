@@ -3,10 +3,12 @@ from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from foodgram.api.filters import IngredientsFilter, RecipeFilter
+from foodgram.api.paginations import RecipePagination
 from foodgram.api.serializers import (CreateSubscriptionSerializers,
                                       FavoriteSerializers,
                                       IngredientSerializers, RecipeSerializers,
@@ -39,6 +41,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializers
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    pagination_class = RecipePagination
 
     def perform_create(self, serializer):
         tags = self.request.data['tags']
