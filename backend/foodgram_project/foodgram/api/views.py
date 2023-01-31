@@ -120,10 +120,16 @@ class FavoriteViewSet(CreateDestroyViewSet):
 
 
 class SubscriptionViewSet(CreateDestroyListRetriveViewSet):
-    serializer_class = SubscriptionSerializers
     permission_classes = [IsAuthenticated]
 
+    def get_serializer_class(self):
+        if self.action== 'list':
+            return SubscriptionSerializers
+        return CreateSubscriptionSerializers
+    
     def get_queryset(self):
+        print(self.request.user.following)
+        print(Subscription.objects.filter(user=self.request.user))
         return Subscription.objects.filter(user=self.request.user)
 
     def destroy(self, request, *args, **kwargs):
@@ -151,8 +157,7 @@ class SubscriptionViewSet(CreateDestroyListRetriveViewSet):
             return Response(data={'errors':
                                   'Нельзя подписаться на самого себя'},
                             status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = CreateSubscriptionSerializers(
+        serializer = self.get_serializer(
             data={'email': following.email, 'id': following.id,
                   'username': following.username,
                   'first_name': following.first_name,

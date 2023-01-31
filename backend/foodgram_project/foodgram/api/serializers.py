@@ -139,7 +139,7 @@ class SubscriptionSerializers(serializers.Serializer):
     last_name = serializers.CharField(
         source='following.last_name', required=False)
     is_subscribed = serializers.BooleanField(default=True)
-    recipe = RecipesmallSerializers(source='following.recipes', many=True)
+    recipes = RecipesmallSerializers(source='following.recipes', many=True)
     recipes_count = serializers.SerializerMethodField(
         read_only=True, required=False)
 
