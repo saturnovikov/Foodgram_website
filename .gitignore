@@ -104,6 +104,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env copy
 .venv
 env/
 venv/
@@ -136,3 +137,5 @@ dmypy.json
 
 # папки со статикой и медиа
 media/
+
+docker-compose_local.yaml

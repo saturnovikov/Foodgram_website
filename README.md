@@ -1,34 +1,36 @@
-# [«Продуктовый помощник»](http://fodgram-av.sytes.net)
-**ВЫПОЛНЕНИЕ ПЕРВОГО ЭТАПА + СОЗДАН КОНТЕЙНЕР ДЛЯ ТЕСТИРОВАНИЯ С ФРОНТОМ.**
+# [«Продуктовый помощник»](http://http://84.201.164.171/recipes)
 
 ## Описание
 
-Продуктовый помощник - [__сайт__](http://...), на котором пользователи будут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других авторов. Сервис «Список покупок» позволит пользователям создавать список продуктов, которые нужно купить для приготовления выбранных блюд, и скачивать файл (.txt) со списком нужных продуктов и их количеством.
+Продуктовый помощник - [__сайт__](http://http://84.201.164.171/recipes), на котором пользователи будут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других авторов. Сервис «Список покупок» позволит пользователям создавать список продуктов, которые нужно купить для приготовления выбранных блюд, и скачивать файл (.txt) со списком нужных продуктов и их количеством.
 
 Также реализован сервис API.
-Документация к API доступна по адресу: http://.../api/docs/
+Документация к API доступна по адресу: http://84.201.164.171/api/docs/
 
 ### Алгоритм регистрации пользователей
-Регистрация пользователей происходит на странице [Регистрация](http://.../signup).
+Регистрация пользователей происходит на странице [Регистрация](http://84.201.164.171/signup).
 Авторизация реализована с помощью токенов. 
-[Вход](http://.../login) на сайт выполняется с помощью email и пароля.
+[Вход](http://84.201.164.171/login) на сайт выполняется с помощью email и пароля.
 
 ## Установка
-В директории backend/foodgram_project находится файл docker-compose.yaml
+В директории **infra/** находится файл docker-compose.yaml
 ```
+Запуск контейнера:
 docker-compose up -d --build
 ```
 Далее выполнить:
 ```
-docker-compose exec web python manage.py migrate
-docker-compose exec web python manage.py createsuperuser # если будет загружаться дамп, то можно пропустить
-docker-compose exec web python manage.py collectstatatic --noinput
+docker-compose exec <название контейнера web> bash 
+python manage.py migrate
+python manage.py createsuperuser # если будет загружаться дамп, то можно пропустить
+python manage.py collectstatatic --noinput
 ```
 
 ### Импорт данных БД из файла db_foodgram.json
 
 ```
-docker-compose exec web python3 manage.py shell
+docker-compose exec <название контейнера web> bash
+python manage.py shell
 
 выполнить в открывшемся терминале:
 
@@ -38,8 +40,9 @@ docker-compose exec web python3 manage.py shell
 
 >>>quit()
 
-docker-compose exec web python3 manage.py loaddata db_foodgram.json
+python manage.py loaddata db_foodgram.json
 ```
+
 *superuser: admin, пароль: admin*.
 
 ### ENV
@@ -47,11 +50,11 @@ docker-compose exec web python3 manage.py loaddata db_foodgram.json
 ```
 DB_ENGINE=django.db.backends.postgresql # указываем, что работаем с postgresql
 
-DB_NAME=<имя базы данных>
+POSTGRES_DB=<имя базы данных>
 
-POSTGRES_USER=<логин для подключения к базе данных>
+DB_USER=<логин для подключения к базе данных>
 
-POSTGRES_PASSWORD=<пароль для подключения к БД>
+DB_PASSWORD=<пароль для подключения к БД>
 
 DB_HOST=<название сервиса (контейнера)> 
 

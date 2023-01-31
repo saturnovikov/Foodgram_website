@@ -1,7 +1,7 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 
-from foodgram.models import Recipe, Subscription
+from foodgram.models import Subscription
 from users.models import User
 
 
@@ -38,4 +38,3 @@ class UserIdSerializer(UserSerializer):
         following = obj.id
         return Subscription.objects.filter(
             user__username=username, following=following).exists()
-

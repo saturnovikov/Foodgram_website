@@ -3,7 +3,6 @@ from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.generics import get_object_or_404
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -123,10 +122,10 @@ class SubscriptionViewSet(CreateDestroyListRetriveViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
-        if self.action== 'list':
+        if self.action == 'list':
             return SubscriptionSerializers
         return CreateSubscriptionSerializers
-    
+
     def get_queryset(self):
         print(self.request.user.following)
         print(Subscription.objects.filter(user=self.request.user))

@@ -8,7 +8,7 @@ from users.models import User
 
 class UsersView(views.UserViewSet):
     queryset = User.objects.all()
-    
+
     @action(['get'], detail=False)
     def me(self, request):
         user = request.user
