@@ -127,8 +127,6 @@ class SubscriptionViewSet(CreateDestroyListRetriveViewSet):
         return CreateSubscriptionSerializers
 
     def get_queryset(self):
-        print(self.request.user.following)
-        print(Subscription.objects.filter(user=self.request.user))
         return Subscription.objects.filter(user=self.request.user)
 
     def destroy(self, request, *args, **kwargs):
