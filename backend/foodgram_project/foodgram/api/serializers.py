@@ -27,11 +27,17 @@ class RecipeIngredientSerializers(serializers.ModelSerializer):
     measurement_unit = serializers.CharField(
         source='ingredient.measurement_unit',
         read_only=True)
-    amount = serializers.CharField()
+    amount = serializers.IntegerField()
 
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'name', 'measurement_unit', 'amount')
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError(
+                'Количество не может быть отрицательным или нулевым')
+        return value
 
 
 class RecipeSerializers(serializers.ModelSerializer):

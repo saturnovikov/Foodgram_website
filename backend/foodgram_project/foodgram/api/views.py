@@ -33,7 +33,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = IngredientsFilter
     search_fields = ['^name']
     pagination_class = None
-
+    
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
