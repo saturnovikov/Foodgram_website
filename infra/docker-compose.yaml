@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   database:
+    container_name: database
     image: postgres:13.0-alpine
     volumes:
       - database_volume:/var/lib/postgresql/data/
@@ -9,6 +10,7 @@ services:
       - ../.env
 
   web:
+    container_name: web
     image: avnovikovsm/foodgram:v03
     restart: always
     ports:
@@ -22,6 +24,7 @@ services:
       - ../.env
 
   frontend:
+    container_name: frontend
     build: ../frontend
     links:
       - web
@@ -29,6 +32,7 @@ services:
       - ../frontend/:/app/result_build/
 
   nginx:
+    container_name: ngnix
     image: nginx:1.21.3-alpine
     ports:
       - "80:80"
