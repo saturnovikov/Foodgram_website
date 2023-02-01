@@ -9,6 +9,7 @@ ROLE_CHOICES = (
     ('admin', 'Администратор'),
 )
 USERNAME_REGEX = RegexValidator(r'^[\w.@+-]+\Z')
+NAME_REGEX = RegexValidator(r'^[\D]+\Z')
 
 
 class User(AbstractUser):
@@ -25,11 +26,12 @@ class User(AbstractUser):
     first_name = models.CharField(
         'Имя',
         max_length=150,
-
+        validators=[NAME_REGEX],
     )
     last_name = models.CharField(
         'Фамилия',
         max_length=150,
+        validators=[NAME_REGEX]
     )
     password = models.CharField(
         'Пароль',

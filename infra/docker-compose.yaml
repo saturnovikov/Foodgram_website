@@ -11,7 +11,7 @@ services:
 
   web:
     container_name: web
-    image: avnovikovsm/foodgram:v03
+    image: avnovikovsm/foodgram:latest
     restart: always
     ports:
      - "8001:8000"

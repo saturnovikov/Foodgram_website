@@ -19,21 +19,21 @@ class IngredientAdmin(admin.ModelAdmin):
     list_per_page = COUNT_DISPLAY_INGREDIENT
 
 
+class RecipeIngredientAdmin(admin.TabularInline):
+    model = RecipeIngredient
+    min_num = 1
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'count_favorite')
     list_filter = ('name', 'author', 'tags',)
     list_per_page = COUNT_DISPLAY_RECIPE
+    inlines = (RecipeIngredientAdmin,)
 
     @admin.display(description='Count_favorite')
     def count_favorite(self, obj):
         return Favorite.objects.filter(recipe=obj.id).count()
-
-
-@admin.register(RecipeIngredient)
-class RecipeIngredientAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'recipe', 'ingredient', 'amount')
-    list_per_page = COUNT_DISPLAY_RECIPE
 
 
 @admin.register(Subscription)
