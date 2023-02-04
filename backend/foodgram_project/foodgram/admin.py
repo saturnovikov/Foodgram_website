@@ -27,11 +27,12 @@ class RecipeIngredientAdmin(admin.TabularInline):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'count_favorite')
+    readonly_fields = ('count_favorite',)
     list_filter = ('name', 'author', 'tags',)
     list_per_page = COUNT_DISPLAY_RECIPE
     inlines = (RecipeIngredientAdmin,)
 
-    @admin.display(description='Count_favorite')
+    @admin.display(description='Кол-во добавлений в избранное')
     def count_favorite(self, obj):
         return Favorite.objects.filter(recipe=obj.id).count()
 

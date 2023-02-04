@@ -1,5 +1,7 @@
 # [«Продуктовый помощник»](http://84.201.164.171)
 
+[![Foodgram workflow](https://github.com/saturnovikov/foodgram-project-react/actions/workflows/foodgram.yml/badge.svg)](https://github.com/saturnovikov/foodgram-project-react/actions/workflows/foodgram.yml)
+
 ## Описание
 
 Продуктовый помощник - [__сайт__](http://http://84.201.164.171/recipes), на котором пользователи будут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других авторов. Сервис «Список покупок» позволит пользователям создавать список продуктов, которые нужно купить для приготовления выбранных блюд, и скачивать файл (.txt) со списком нужных продуктов и их количеством.
