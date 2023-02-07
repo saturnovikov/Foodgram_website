@@ -10,7 +10,8 @@ MIN_COOKING_TIME = 1
 class Ingredient(models.Model):
     name = models.CharField(
         'Название',
-        max_length=200
+        max_length=200,
+        db_index=True
     )
     measurement_unit = models.CharField(
         'Единицы измерения',
@@ -62,7 +63,6 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         verbose_name='Ингредиент',
-        # related_name='recipe',
         through='RecipeIngredient'
     )
     image = models.ImageField(

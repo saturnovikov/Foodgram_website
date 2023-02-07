@@ -40,4 +40,3 @@ jobs:
             sudo docker-compose -f infra/docker-compose.yaml stop
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram:latest
             sudo docker-compose -f infra/docker-compose.yaml up -d
-            sudo docker image rm ${{ secrets.DOCKER_USERNAME }}/foodgram

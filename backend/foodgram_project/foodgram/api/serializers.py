@@ -77,8 +77,12 @@ class RecipeSerializers(serializers.ModelSerializer):
         RecipeIngredient.objects.bulk_create(objs)
 
     def validate_ingredients(self, value):
+        if not value:
+            text = 'Добавьте, пожалуйста, ингредиенты.'
+            raise serializers.ValidationError(text)
         ids = []
         for obj in value:
+            print(obj)
             id_ingredient = obj['ingredient']['id']
             if bool(ids.count(id_ingredient)):
                 text = 'Ингредиент дублируется. Проверьте список ингредиентов.'

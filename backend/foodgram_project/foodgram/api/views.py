@@ -33,7 +33,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = IngredientsFilter
     search_fields = ['^name']
     pagination_class = None
-    
+
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
@@ -41,6 +41,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = RecipePagination
+
+    def create(self, request, *args, **kwargs):
+        tags = self.request.data['tags']
+        if not tags:
+            return Response(data=f'Добавьте, пожалуйста, tags'
+                            f' - "1 - Завтрак", "2 - Обед" или "3 - Ужин"',
+                            status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
 
     def perform_create(self, serializer):
         tags = self.request.data['tags']
