@@ -56,8 +56,9 @@ class RecipeSerializers(serializers.ModelSerializer):
                   'cooking_time')
 
     def get_is_favorited(self, obj):
-        username = self.context.get('request').user
-        return Favorite.objects.filter(user__username=username,
+        user = self.context.get('request').user
+        print(user)
+        return Favorite.objects.filter(user__username=user,
                                        recipe__id=obj.id).exists()
 
     def get_is_in_shopping_cart(self, obj):
@@ -82,7 +83,6 @@ class RecipeSerializers(serializers.ModelSerializer):
             raise serializers.ValidationError(text)
         ids = []
         for obj in value:
-            print(obj)
             id_ingredient = obj['ingredient']['id']
             if bool(ids.count(id_ingredient)):
                 text = 'Ингредиент дублируется. Проверьте список ингредиентов.'

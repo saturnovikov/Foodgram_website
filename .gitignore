@@ -137,4 +137,7 @@ dmypy.json
 # папки со статикой и медиа
 media/
 
+# файлы для отладки проекта
 docker-compose_local.yaml
+dif_logs.py
+
