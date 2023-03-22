@@ -1,3 +1,5 @@
+### Учебный проект
+
 # [«Продуктовый помощник»](http://84.201.164.171)
 
 [![Foodgram workflow](https://github.com/saturnovikov/foodgram-project-react/actions/workflows/foodgram.yml/badge.svg)](https://github.com/saturnovikov/foodgram-project-react/actions/workflows/foodgram.yml)
