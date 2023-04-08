@@ -12,7 +12,7 @@ DEBUG = False
 
 AUTH_USER_MODEL = 'users.User'
 
-ALLOWED_HOSTS = ['localhost', '84.201.164.171']
+ALLOWED_HOSTS = ['84.201.164.171']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
