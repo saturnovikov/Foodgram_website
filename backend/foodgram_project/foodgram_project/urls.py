@@ -7,7 +7,7 @@ urlpatterns = [
     path('api/users/', include('users.api.urls')),
     path('api/auth/', include('users.api.urls')),
     path('api/', include('foodgram.api.urls')),
-    path('admin/', admin.site.urls),
+    path('admin1235/', admin.site.urls),
 ]
 
 
